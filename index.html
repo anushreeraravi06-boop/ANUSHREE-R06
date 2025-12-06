@@ -35,6 +35,31 @@
 </style>
 </head>
 <body>
+  <div id="startScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;">
+  <h2>🚨 Women Safety App</h2>
+  <p>Tap below to enable sound and sensors</p>
+  <button onclick="enableSystem()" style="padding:10px 20px;background:red;color:white;border:none;border-radius:10px;">Enable System</button>
+</div>
+
+<script>
+function enableSystem() {
+  const audio = new (window.AudioContext || window.webkitAudioContext)();
+  audio.resume();
+
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission()
+      .then(response => {
+        if (response === 'granted') {
+          alert('Shake detection enabled!');
+        }
+      })
+      .catch(console.error);
+  }
+
+  document.getElementById('startScreen').style.display = 'none';
+}
+</script>
+
 <header>
   <h1>She Shield — Women Safety</h1>
   <p class="lead">Demo app: SOS modes, loud siren, location sharing, shake/voice triggers.</p>

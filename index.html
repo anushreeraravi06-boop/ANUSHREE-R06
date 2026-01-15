@@ -1,531 +1,228 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>She Shield — Women Safety (Demo)</title>
-<meta name="description" content="Women safety web app demo — SOS, loud siren, location share, fake call, shake/voice triggers." />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>She-Shield | Step-by-Step Safety</title>
+
 <style>
-  :root{--bg:#0f1724;--card:#0b1220;--accent:#ff3b30;--muted:#9aa6b2;--glass:rgba(255,255,255,0.03)}
-  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
-  body{margin:0;background:linear-gradient(180deg,#071021 0%, #07121a 100%);color:#e6eef8;min-height:100vh}
-  header{padding:20px 18px;text-align:center}
-  h1{font-weight:600;margin:6px 0 2px;font-size:30px}
-  p.lead{color:var(--muted);margin:0 0 8px}
-  .wrap{max-width:900px;margin:0 auto;padding:12px}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 20px rgba(0,0,0,0.6)}
-  button.big{width:100%;padding:16px;border-radius:10px;border:0;font-size:18px;font-weight:600;cursor:pointer}
-  .danger{background:linear-gradient(90deg, #ff6347, #ff3b30); color:white}
-  .secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-  .row{display:flex;gap:10px}
-  .col{flex:1}
-  #log{margin-top:10px;color:var(--muted);font-size:13px;max-height:120px;overflow:auto;padding:6px;background:rgba(255,255,255,0.02);border-radius:8px}
-  .full{grid-column:1/-1}
-  label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
-  input,select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e6eef8}
-  .small{font-size:13px;color:var(--muted)}
-  footer{padding:18px;text-align:center;color:var(--muted);font-size:13px}
-  .tips{line-height:1.5;color:var(--muted)}
-  .chip{display:inline-block;padding:6px 10px;background:var(--glass);border-radius:999px;margin-right:8px;color:var(--muted)}
-  .contactList{margin-top:8px}
-  .contactItem{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02)}
-  .mutedBtn{background:transparent;border:0;color:var(--muted);cursor:pointer}
-  @media(max-width:800px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5efe6;
+  color:#3a2c2c;
+}
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:16px;
+}
+h1{
+  text-align:center;
+  color:#e07a5f;
+}
+.step{
+  background:#fffaf3;
+  padding:14px;
+  border-radius:14px;
+  margin-bottom:14px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
+}
+.step h3{
+  margin:0 0 8px;
+  color:#e07a5f;
+}
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.primary{background:#e07a5f;color:white;}
+.secondary{background:#f4a261;color:white;}
+.muted{background:#eee;}
+small{opacity:.7}
+
+#enableScreen{
+  position:fixed;inset:0;
+  background:#000000c0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+#enableBox{
+  background:#fffaf3;
+  padding:20px;
+  border-radius:14px;
+  text-align:center;
+}
+#flash{
+  position:fixed;
+  inset:0;
+  background:white;
+  opacity:0;
+  pointer-events:none;
+  z-index:9998;
+}
 </style>
 </head>
+
 <body>
-  <div id="startScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;">
-  <h2>🚨 Women Safety App</h2>
-  <p>Tap below to enable sound and sensors</p>
-  <button onclick="enableSystem()" style="padding:10px 20px;background:red;color:white;border:none;border-radius:10px;">Enable System</button>
-</div>
 
-<script>
-function enableSystem() {
-  const audio = new (window.AudioContext || window.webkitAudioContext)();
-  audio.resume();
-
-  if (typeof DeviceMotionEvent.requestPermission === 'function') {
-    DeviceMotionEvent.requestPermission()
-      .then(response => {
-        if (response === 'granted') {
-          alert('Shake detection enabled!');
-        }
-      })
-      .catch(console.error);
-  }
-
-  document.getElementById('startScreen').style.display = 'none';
-}
-</script>
-
-<header>
-  <h1>She Shield — Women Safety</h1>
-  <p class="lead">Demo app: SOS modes, loud siren, location sharing, shake/voice triggers.</p>
-</header>
-
-<div class="wrap">
-  <div class="grid">
-    <!-- SOS Controls -->
-    <div class="card">
-      <label>Immediate SOS</label>
-      <div class="row">
-        <div class="col">
-          <button id="criticalBtn" class="big danger">SEND CRITICAL SOS</button>
-        </div>
-        <div class="col">
-          <button id="discreetBtn" class="big secondary">Discreet SOS (Share Only)</button>
-        </div>
-      </div>
-
-      <div style="height:10px"></div>
-      <div class="row">
-        <div class="col"><button id="startSiren" class="big danger">Start Siren</button></div>
-        <div class="col"><button id="stopSiren" class="big secondary">Stop Siren</button></div>
-      </div>
-
-      <div style="height:10px"></div>
-      <div class="row">
-        <div class="col"><button id="fakeCall" class="big secondary">Fake Incoming Call</button></div>
-        <div class="col"><button id="shareLoc" class="big secondary">Share Location</button></div>
-      </div>
-
-      <div id="log" aria-live="polite"></div>
-    </div>
-
-    <!-- Sensors and Triggers -->
-    <div class="card">
-      <label>Triggers & Sensors</label>
-      <div class="small">
-        <div class="chip">Shake: <span id="shakeState">OFF</span></div>
-        <div class="chip">Voice: <span id="voiceState">OFF</span></div>
-        <div class="chip">Long Press: Hold Critical Button</div>
-      </div>
-
-      <div style="height:12px"></div>
-      <label>Check-in Timer (minutes)</label>
-      <input id="checkinMins" type="number" min="0" value="0" />
-      <div style="height:8px"></div>
-      <button id="startCheckin" class="big">Start Check-in</button>
-      <button id="cancelCheckin" class="big secondary">Cancel Check-in</button>
-
-      <div style="height:12px"></div>
-      <label>Test Controls</label>
-      <div class="row">
-        <button id="testShake" class="big secondary">Simulate Shake</button>
-        <button id="testVoice" class="big secondary">Simulate Voice</button>
-      </div>
-    </div>
-
-    <!-- Contacts -->
-    <div class="card full">
-      <label>Emergency Contacts (stored in browser)</label>
-      <div class="row" style="margin-bottom:10px">
-        <input id="contactName" placeholder="Name" />
-        <input id="contactPhone" placeholder="Phone (with country code)" />
-        <button id="addContact" class="big secondary">Add</button>
-      </div>
-      <div id="contacts" class="contactList"></div>
-    </div>
-
-    <!-- Location & Options -->
-    <div class="card full">
-      <label>Location & Options</label>
-      <div class="row">
-        <div class="col"><button id="getLoc" class="big">Get Current Location</button></div>
-        <div class="col"><button id="startTrack" class="big secondary">Start Live Tracking</button></div>
-      </div>
-
-      <div style="height:10px"></div>
-      <label>Webhook / Demo endpoint</label>
-      <input id="webhookURL" placeholder="Optional: webhook.site URL to receive JSON" />
-      <div style="height:10px"></div>
-      <p class="small">If you provide a webhook URL, the app will POST location JSON when SOS triggers. If not, it will copy a share message to clipboard.</p>
-    </div>
-
-    <!-- Tips -->
-    <div class="card full">
-      <label>Self Defence Tips</label>
-      <div class="tips">
-        <ol>
-          <li>Stay calm and shout to draw attention.</li>
-          <li>Run to a safe public area and call emergency services.</li>
-          <li>If threatened physically, aim for eyes, throat, groin.</li>
-          <li>Keep your phone accessible; use discreet audio+text sharing.</li>
-        </ol>
-      </div>
-    </div>
+<!-- ENABLE SCREEN -->
+<div id="enableScreen">
+  <div id="enableBox">
+    <h2>Enable Safety System</h2>
+    <p><small>Required for sound, motion & location</small></p>
+    <button class="primary" onclick="enableSystem()">Enable</button>
   </div>
 </div>
 
-<footer>
-  <small>Built by you • Deploy via GitHub Pages • Test only — this is a demo.</small>
-</footer>
+<div id="flash"></div>
 
-<!-- ----------------- SCRIPT: all functionality ----------------- -->
+<div class="container">
+<h1>She-Shield</h1>
+
+<!-- STEP 1 -->
+<div class="step">
+  <h3>STEP 1 – Siren Alert</h3>
+  <button class="primary" onclick="startSiren()">🔊 Start Siren</button>
+  <button class="muted" onclick="stopSiren()">Stop Siren</button>
+</div>
+
+<!-- STEP 2 -->
+<div class="step">
+  <h3>STEP 2 – Emergency SOS</h3>
+  <button class="primary" onclick="emergencySOS()">🚨 Emergency SOS</button>
+</div>
+
+<!-- STEP 3 -->
+<div class="step">
+  <h3>STEP 3 – Share Live Location</h3>
+  <button class="secondary" onclick="shareLocation()">📍 Share Location (WhatsApp)</button>
+</div>
+
+<!-- STEP 4 -->
+<div class="step">
+  <h3>STEP 4 – Voice SOS</h3>
+  <button class="secondary" onclick="startVoice()">🎙️ Say “HELP”</button>
+</div>
+
+<!-- STEP 5 -->
+<div class="step">
+  <h3>STEP 5 – Fake Call</h3>
+  <button class="secondary" onclick="fakeCall()">📞 Fake Incoming Call</button>
+</div>
+
+<!-- STEP 6 -->
+<div class="step">
+  <h3>STEP 6 – Emergency Helplines</h3>
+  <a href="tel:112"><button class="primary">🚔 Police 112</button></a><br><br>
+  <a href="tel:181"><button class="secondary">👩 Women Helpline 181</button></a><br><br>
+  <a href="tel:108"><button class="muted">🚑 Ambulance 108</button></a>
+</div>
+
+<div id="status"><small>Status: Ready</small></div>
+</div>
+
 <script>
-/* ---------- Utility & state ---------- */
-const logEl = id => (document.getElementById('log').innerText = id + '\n' + document.getElementById('log').innerText);
-const webhookInput = () => document.getElementById('webhookURL').value.trim();
-const contactsKey = 'she_shield_contacts_v1';
-let watchId = null;
-let checkinTimer = null;
-let checkinCount = 0;
-
-/* ---------- Contacts ---------- */
-function loadContacts(){
-  const raw = localStorage.getItem(contactsKey);
-  const arr = raw ? JSON.parse(raw) : [];
-  renderContacts(arr);
-  return arr;
-}
-function saveContacts(arr){ localStorage.setItem(contactsKey, JSON.stringify(arr)); renderContacts(arr); }
-function renderContacts(arr){
-  const el = document.getElementById('contacts'); el.innerHTML = '';
-  if(!arr.length){ el.innerHTML = '<div class="small">No contacts saved.</div>'; return; }
-  arr.forEach((c, i) => {
-    const div = document.createElement('div'); div.className='contactItem';
-    div.innerHTML = `<div><strong>${escapeHtml(c.name)}</strong><div class="small">${escapeHtml(c.phone)}</div></div>
-      <div><button class="mutedBtn" data-i="${i}">Remove</button></div>`;
-    el.appendChild(div);
-  });
-  el.querySelectorAll('.mutedBtn').forEach(b=>b.addEventListener('click', e=>{
-    const idx = +e.currentTarget.dataset.i; const arr = loadContacts(); arr.splice(idx,1); saveContacts(arr);
-  }));
-}
-function addContact(){ const n = document.getElementById('contactName').value.trim(); const p = document.getElementById('contactPhone').value.trim(); if(!n||!p){ alert('Enter name and phone'); return; } const arr = loadContacts(); arr.push({name:n,phone:p}); saveContacts(arr); document.getElementById('contactName').value=''; document.getElementById('contactPhone').value=''; logEl('Contact saved: '+n); }
-document.getElementById('addContact').addEventListener('click', addContact);
-loadContacts();
-
-/* ---------- Location ---------- */
-function getCurrentLocation(){
-  if(!navigator.geolocation){ alert('Geolocation not supported'); return; }
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const {latitude,longitude,accuracy} = pos.coords;
-    logEl(`Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${accuracy}m)`);
-    showLocationToast(latitude, longitude, accuracy);
-    return {latitude,longitude,accuracy};
-  }, err=>{ logEl('Location error: '+err.message); alert('Location error: '+err.message); }, {enableHighAccuracy:true,timeout:8000});
-}
-document.getElementById('getLoc').addEventListener('click', getCurrentLocation);
-
-/* Live tracking */
-function startWatch(){
-  if(watchId !== null){ navigator.geolocation.clearWatch(watchId); watchId=null; document.getElementById('startTrack').innerText='Start Live Tracking'; logEl('Stopped tracking'); return; }
-  if(!navigator.geolocation){ alert('Geolocation not supported'); return; }
-  watchId = navigator.geolocation.watchPosition(pos=>{
-    const {latitude,longitude,accuracy} = pos.coords;
-    logEl(`Tracking: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${accuracy}m)`);
-  }, err=>{ logEl('Tracking error: '+err.message); }, {enableHighAccuracy:true,maximumAge:3000});
-  document.getElementById('startTrack').innerText='Stop Live Tracking'; logEl('Started tracking');
-}
-document.getElementById('startTrack').addEventListener('click', startWatch);
-
-/* ---------- Share helpers ---------- */
-async function shareLocationMessage(lat, lon, note='I need help') {
-  const message = `${note}\nMy location: https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-  const hook = webhookInput();
-  if(hook){
-    // send JSON to webhook for demo
-    try{
-      await fetch(hook, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,lat,lon,timestamp:new Date().toISOString()})});
-      logEl('Webhook POSTed');
-    }catch(e){ logEl('Webhook error: '+e.message); }
-  }
-  if(navigator.share){
-    try{ await navigator.share({title:'Emergency',text:message}); logEl('Shared via Web Share'); return; } catch(e){ logEl('Web Share failed'); }
-  }
-  // WhatsApp fallback
-  const wa = `https://wa.me/?text=${encodeURIComponent(message)}`;
-  try{ await navigator.clipboard.writeText(message); logEl('Message copied to clipboard (paste to WhatsApp/Message)'); }catch(e){ logEl('Clipboard fail'); }
-  window.open(wa,'_blank');
-}
-
-/* ---------- Fake Incoming Call ---------- */
-function showFakeCall(){
-  const modal = document.createElement('div');
-  modal.style.position='fixed'; modal.style.inset='0'; modal.style.display='flex'; modal.style.alignItems='center'; modal.style.justifyContent='center'; modal.style.background='rgba(0,0,0,0.6)'; modal.style.zIndex=9999;
-  const box = document.createElement('div'); box.style.background='#071427'; box.style.padding='18px'; box.style.borderRadius='12px'; box.style.textAlign='center'; box.style.width='320px';
-  box.innerHTML = `<h3 style="margin:0 0 8px">Incoming Call</h3><p style="color:#9aa6b2;margin:0 0 12px">From: Unknown</p><div style="display:flex;gap:8px;justify-content:center">
-    <button id="fakeAnswer" style="padding:10px 12px;border-radius:8px;background:#0ea5a2;border:0;color:#000;font-weight:700">Answer</button>
-    <button id="fakeDecline" style="padding:10px 12px;border-radius:8px;background:#ff3b30;border:0;color:#fff;font-weight:700">Decline</button>
-  </div>`;
-  modal.appendChild(box); document.body.appendChild(modal);
-  const audio = new Audio(''); // can add a ringtone url
-  // auto-play try
-  audio.loop=true; audio.play().catch(()=>{});
-  document.getElementById('fakeAnswer').addEventListener('click', ()=>{
-    audio.pause(); modal.remove(); alert('Pretend call answered — safe escape opportunity');
-  });
-  document.getElementById('fakeDecline').addEventListener('click', ()=>{ audio.pause(); modal.remove(); });
-}
-document.getElementById('fakeCall').addEventListener('click', showFakeCall);
-
-/* ---------- Siren Controller (WebAudio strong police-like) ---------- */
-let audioCtx = null;
-let sirenNodes = null;
-let sirenTimeout = null;
-let sirenActive = false;
-
-// Try to use uploaded mp3 fallback (if present), otherwise synthesize
-const fallbackAudio = new Audio('./siren.mp3'); // if you upload siren.mp3 in repo this will be used (fallback)
-fallbackAudio.loop = true; fallbackAudio.preload = 'auto';
-
-async function startSiren(durationMs = 10*60*1000){
-  if(sirenActive){
-    if(sirenTimeout) clearTimeout(sirenTimeout);
-    if(durationMs>0) sirenTimeout = setTimeout(stopSiren,durationMs);
-    logEl('Siren: already active, timer reset');
-    return;
-  }
-
-  // Prefer fallback file if it loads
-  try {
-    await fallbackAudio.play();
-    sirenActive = true;
-    logEl('Siren: playing uploaded audio file (siren.mp3)');
-    if(durationMs>0) sirenTimeout = setTimeout(stopSiren,durationMs);
-    if(navigator.vibrate) navigator.vibrate([400,200,400,200,400]);
-    return;
-  } catch(e){
-    // fallback to WebAudio synth
-    // console.warn('Audio file play blocked or missing, using synth',e);
-  }
-
-  try{
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // create nodes
-    const gain = audioCtx.createGain();
-    gain.gain.value = 0.0;
-    gain.connect(audioCtx.destination);
-
-    const oscA = audioCtx.createOscillator();
-    const oscB = audioCtx.createOscillator();
-    oscA.type='sawtooth';
-    oscB.type='sawtooth';
-    // Detune for richness
-    oscA.frequency.value = 500;
-    oscB.frequency.value = 900;
-    oscB.detune.value = -20;
-
-    const tremolo = audioCtx.createOscillator();
-    tremolo.frequency.value = 2.2; // siren sweep speed
-    const tremGain = audioCtx.createGain();
-    tremGain.gain.value = 150; // sweeps frequency
-
-    // connect sweep control to oscillator frequencies
-    tremolo.connect(tremGain);
-    tremGain.connect(oscA.frequency);
-    tremGain.connect(oscB.frequency);
-
-    // create a filter to make it sound like a real siren
-    const filter = audioCtx.createBiquadFilter();
-    filter.type='bandpass';
-    filter.frequency.value = 800;
-    filter.Q.value = 1.0;
-
-    oscA.connect(filter);
-    oscB.connect(filter);
-    filter.connect(gain);
-
-    oscA.start();
-    oscB.start();
-    tremolo.start();
-
-    // ramp volume up quick for loud siren
-    gain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.9, audioCtx.currentTime + 0.12);
-
-    // store for stop
-    sirenNodes = {gain,oscA,oscB,tremolo,tremGain,filter};
-
-    // vibration
-    if(navigator.vibrate) navigator.vibrate([500,200,500,200,500]);
-
-    sirenActive = true;
-    logEl('Siren: WebAudio synth started');
-
-    if(durationMs>0) sirenTimeout = setTimeout(stopSiren,durationMs);
-  }catch(e){ console.error('Siren start failed',e); logEl('Siren start failed: '+e.message); }
-}
-
-function stopSiren(){
-  // stop fallback audio
-  try { fallbackAudio.pause(); fallbackAudio.currentTime = 0; } catch(e){}
-  if(sirenTimeout){ clearTimeout(sirenTimeout); sirenTimeout=null;}
-  if(!sirenActive){ logEl('Siren: already stopped'); return; }
-  // stop webaudio nodes
-  if(sirenNodes){
-    try{
-      const {gain,oscA,oscB,tremolo} = sirenNodes;
-      gain.gain.cancelScheduledValues(audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
-      setTimeout(()=>{
-        try{ oscA.stop(); oscB.stop(); tremolo.stop(); }catch(e){}
-        sirenNodes=null;
-      },120);
-    }catch(e){ console.warn('Siren stop error',e); }
-  }
-  if(navigator.vibrate) navigator.vibrate(0);
-  sirenActive=false;
-  logEl('Siren stopped');
-}
-
-/* UI bindings */
-document.getElementById('startSiren').addEventListener('click', ()=> startSiren(10*60*1000));
-document.getElementById('stopSiren').addEventListener('click', stopSiren);
-
-/* ---------- Shake detection ---------- */
+let audioCtx, osc, recognition;
 let lastShake = 0;
-let shakeEnabled = true;
-function initShake(){
-  if(!('DeviceMotionEvent' in window)){ document.getElementById('shakeState').innerText='NOT SUPPORTED'; return; }
-  function handleMotion(e){
-    if(!shakeEnabled) return;
-    const a = e.accelerationIncludingGravity;
-    const g = Math.sqrt((a.x*a.x)+(a.y*a.y)+(a.z*a.z));
-    if(g>22){ // threshold -- strong shake
-      const now=Date.now();
-      if(now - lastShake > 1500){
-        lastShake = now;
-        logEl('Shake detected -> triggering discreet SOS');
-        performDiscreetSOS();
-      }
-    }
-  }
-  window.addEventListener('devicemotion', handleMotion);
-  document.getElementById('testShake').addEventListener('click', ()=>{ logEl('Simulated shake'); performDiscreetSOS(); });
-  document.getElementById('shakeState').innerText='ON';
+
+/* ENABLE */
+function enableSystem(){
+  document.getElementById("enableScreen").style.display="none";
+  audioCtx = new (window.AudioContext||webkitAudioContext)();
+  audioCtx.resume();
+  initShake();
+  setStatus("System enabled");
 }
-initShake();
 
-/* ---------- Long-press for critical SOS ---------- */
-(function(){
-  const btn = document.getElementById('criticalBtn');
-  let timer = null;
-  const holdMs = 900;
-  btn.addEventListener('mousedown', ()=>{ timer = setTimeout(()=>{ logEl('Long press -> critical SOS triggered'); performCriticalSOS(true); }, holdMs); });
-  btn.addEventListener('touchstart', ()=>{ timer = setTimeout(()=>{ logEl('Long press -> critical SOS triggered'); performCriticalSOS(true); }, holdMs); });
-  ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=>btn.addEventListener(ev, ()=>{ if(timer){ clearTimeout(timer); timer=null; } }));
-  // also a click to show warnings
-  btn.addEventListener('click', ()=>{ logEl('Tip: long-press critical button to trigger SOS.'); });
-})();
+/* SIREN */
+function startSiren(){
+  osc = audioCtx.createOscillator();
+  osc.type="sawtooth";
+  osc.frequency.value=700;
+  osc.connect(audioCtx.destination);
+  osc.start();
+  flashScreen();
+}
+function stopSiren(){ osc?.stop(); }
 
-/* ---------- Voice trigger (SpeechRecognition) ---------- */
-let speechRec = null;
-function initVoice(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition){ document.getElementById('voiceState').innerText='NOT SUPPORTED'; return; }
-  speechRec = new SpeechRecognition();
-  speechRec.continuous = true;
-  speechRec.interimResults = false;
-  speechRec.lang = 'en-US';
-  speechRec.onresult = (e)=>{
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const txt = e.results[i][0].transcript.trim().toLowerCase();
-      logEl('Voice heard: '+txt);
-      if(txt.includes('help me') || txt.includes('help') || txt.includes('sos')){
-        logEl('Voice trigger matched -> critical SOS');
-        performCriticalSOS(false);
-      }
+/* FLASH ALERT */
+function flashScreen(){
+  const f = document.getElementById("flash");
+  let i=0;
+  const blink = setInterval(()=>{
+    f.style.opacity = (i%2)?0.8:0;
+    i++;
+    if(i>6){clearInterval(blink);f.style.opacity=0;}
+  },300);
+}
+
+/* SOS */
+function emergencySOS(){
+  startSiren();
+  shareLocation();
+  setStatus("Emergency SOS triggered");
+}
+
+/* LOCATION */
+function shareLocation(){
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const msg=`I need help! My location: https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+    window.open("https://wa.me/?text="+encodeURIComponent(msg));
+  });
+}
+
+/* VOICE SOS */
+function startVoice(){
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert("Voice not supported");return;}
+  recognition = new SR();
+  recognition.onresult=e=>{
+    const text=e.results[0][0].transcript.toLowerCase();
+    if(text.includes("help")||text.includes("sos")){
+      emergencySOS();
     }
   };
-  speechRec.onstart = ()=>document.getElementById('voiceState').innerText='LISTENING';
-  speechRec.onend = ()=>document.getElementById('voiceState').innerText='STOPPED';
-  document.getElementById('testVoice').addEventListener('click', ()=>{ if(!speechRec) return; try{ speechRec.start(); setTimeout(()=>speechRec.stop(),5000); }catch(e){} });
-  document.getElementById('voiceState').innerText='READY';
-}
-initVoice();
-
-/* ---------- Check-in timer ---------- */
-document.getElementById('startCheckin').addEventListener('click', ()=>{
-  const mins = Math.max(0, parseInt(document.getElementById('checkinMins').value || '0'));
-  if(mins<=0){ alert('Enter minutes > 0'); return; }
-  if(checkinTimer) clearInterval(checkinTimer);
-  checkinCount = mins*60;
-  logEl('Check-in started: '+mins+' minutes');
-  checkinTimer = setInterval(()=>{
-    checkinCount--;
-    document.getElementById('log').innerText = `Check-in remaining: ${Math.ceil(checkinCount/60)} min\n` + document.getElementById('log').innerText;
-    if(checkinCount<=0){ clearInterval(checkinTimer); checkinTimer=null; logEl('Check-in missed -> auto-escalation'); performDiscreetSOS('Missed check-in — Please help'); }
-  },1000);
-});
-document.getElementById('cancelCheckin').addEventListener('click', ()=>{ if(checkinTimer) clearInterval(checkinTimer); checkinTimer=null; logEl('Check-in canceled'); });
-
-/* ---------- Perform SOS actions ---------- */
-async function performCriticalSOS(playSiren=true){
-  logEl('Performing critical SOS...');
-  // 1) start siren (loud)
-  if(playSiren) startSiren(10*60*1000);
-  // 2) get location and share
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      const lat=pos.coords.latitude, lon=pos.coords.longitude;
-      await shareLocationMessage(lat,lon,'CRITICAL SOS — I need immediate help!');
-      // Optionally, send SMS via server / twilio (not included)
-    }, err=>{ logEl('Location error: '+err.message); await shareLocationMessage('unknown','unknown','CRITICAL SOS: location not available'); });
-  } else {
-    await shareLocationMessage('unknown','unknown','CRITICAL SOS: browser has no geolocation');
-  }
+  recognition.start();
+  setStatus("Listening… say HELP");
 }
 
-async function performDiscreetSOS(note='Discreet SOS — I need help'){
-  logEl('Discreet SOS: sharing location silently...');
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      const lat=pos.coords.latitude, lon=pos.coords.longitude;
-      await shareLocationMessage(lat,lon,note);
-    }, err=>{ logEl('Location error: '+err.message); await shareLocationMessage('unknown','unknown',note+' (no location)'); });
-  } else {
-    await shareLocationMessage('unknown','unknown',note+' (no geolocation)');
-  }
+/* FAKE CALL (VOICE CONVERSATION) */
+function fakeCall(){
+  const msg = "Hello, where are you? What time will you come? Should I send police? Your father is worried.";
+  const utter = new SpeechSynthesisUtterance(msg);
+  utter.lang="en-IN";
+  speechSynthesis.speak(utter);
+  setStatus("Fake call playing");
 }
 
-/* UI bindings for SOS buttons */
-document.getElementById('discreetBtn').addEventListener('click', ()=> performDiscreetSOS());
-document.getElementById('criticalBtn').addEventListener('dblclick', ()=> performCriticalSOS(true)); // double click as alternate
-// Note: long-press is implemented above to call performCriticalSOS(true)
-
-/* ---------- Clipboard helper ---------- */
-async function copyText(text){
-  try{ await navigator.clipboard.writeText(text); logEl('Copied to clipboard'); }
-  catch(e){ logEl('Clipboard failed'); }
+/* SHAKE TO SOS */
+function initShake(){
+  if(!window.DeviceMotionEvent) return;
+  window.addEventListener("devicemotion",e=>{
+    const a=e.accelerationIncludingGravity;
+    if(!a) return;
+    const g=Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z);
+    const now=Date.now();
+    if(g>22 && now-lastShake>2000){
+      lastShake=now;
+      emergencySOS();
+    }
+  });
 }
 
-/* ---------- Helper: escapeHtml ---------- */
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]); }
-
-/* ---------- Page startup ---------- */
-document.getElementById('shareLoc').addEventListener('click', async ()=>{
-  if(!navigator.geolocation){ alert('Geolocation not available'); return; }
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const lat=pos.coords.latitude, lon=pos.coords.longitude;
-    await shareLocationMessage(lat,lon,'Sharing my location');
-  }, err=>{ alert('Location error: '+err.message); });
-});
-
-document.getElementById('criticalBtn').addEventListener('click', ()=>{ logEl('Hint: long-press this button to trigger critical SOS.'); });
-
-// Contact quick test copy on click (click contact to copy phone)
-document.getElementById('contacts').addEventListener('click', e=>{
-  const btn = e.target.closest('.contactItem');
-  if(!btn) return;
-  const txt = btn.innerText;
-  copyText(txt);
-});
-
-/* ---------- Keyboard shortcuts for testing ---------- */
-window.addEventListener('keydown', e=>{
-  if(e.key==='s'){ startSiren(60*1000); }
-  if(e.key==='x'){ stopSiren(); }
-});
-
-/* ---------- On load ---------- */
-logEl('App ready. Tip: long-press Critical button to send SOS. Double-click also works.');
-
-// Restore contacts display
-loadContacts();
+/* STATUS */
+function setStatus(t){
+  document.getElementById("status").innerHTML="<small>Status: "+t+"</small>";
+}
 </script>
+
 </body>
 </html>
